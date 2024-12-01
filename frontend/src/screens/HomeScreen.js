@@ -7,6 +7,11 @@ import { ContentScreen } from './ContentScreen';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 
+import logo from '../assets/logo.jpg';  // Correct relative path to logo.jpg
+
+
+
+
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -58,21 +63,26 @@ export const HomeScreen = () => {
         <Layout>
           <Header
             style={{
-              padding: '20px 20px', 
-              margin: '0', 
+              padding: '20px 20px',
+              margin: '0',
               background: 'linear-gradient(45deg, #FF8C00, #FF6347)', // Gradient background
               textAlign: 'center',
               color: '#fff', // White text color
-              fontSize: '2rem', // Larger font size
+              fontSize: '3rem', // Larger font size
               fontWeight: 'bold', // Bold text
-              borderRadius: '10px', // Rounded corners for the header
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
+              borderRadius: '20px', // Rounded corners for the header
+              boxShadow: '0 8px 12px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
+              letterSpacing: '2px', // Increased spacing between letters for style
+              animation: 'fadeIn 1.5s ease', // Simple fade-in animation
+              display: 'flex', // Flexbox to center the content
+              justifyContent: 'center', // Center horizontally
+              alignItems: 'center', // Center vertically
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-              {/* Optional: Add an icon here if you want */}
-              <img src="/logo.jpg" alt="TastyTales Logo" style={{ height: '40px', borderRadius: '5px' }} />
-              <h1 style={{ margin: '0', fontSize: '2.5rem' }}>TastyTales</h1>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
+              {/* Logo */}
+              <img src={logo} alt="TastyTales Logo" style={{ height: '60px', borderRadius: '10px' }} />
+              <h1 style={{ margin: '0', fontSize: '3.5rem' }}>TastyTales</h1>
             </div>
           </Header>
   
