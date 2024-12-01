@@ -49,8 +49,8 @@ export const HomeScreen = () => {
   };
 
   return (
-    <div >
-      <Layout style={{ height: '100vh'}}>
+    <div>
+      <Layout style={{ height: '100vh' }}>
         <Sider>
           <div className="demo-logo-vertical" />
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['2']} items={items} onClick={(e) => handlePageChange(e.key)} />
@@ -58,39 +58,41 @@ export const HomeScreen = () => {
         <Layout>
           <Header
             style={{
-              padding: '2px', margin:'2px',
-              background: colorBgContainer,
+              padding: '20px 20px', 
+              margin: '0', 
+              background: 'linear-gradient(45deg, #FF8C00, #FF6347)', // Gradient background
               textAlign: 'center',
-              
+              color: '#fff', // White text color
+              fontSize: '2rem', // Larger font size
+              fontWeight: 'bold', // Bold text
+              borderRadius: '10px', // Rounded corners for the header
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
             }}
           >
-            <h1> ¯`*•.¸,¤°´✿.｡.:* Recipe Media *.:｡.✿`°¤,¸.•*´¯ </h1>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+              {/* Optional: Add an icon here if you want */}
+              <img src="/logo.jpg" alt="TastyTales Logo" style={{ height: '40px', borderRadius: '5px' }} />
+              <h1 style={{ margin: '0', fontSize: '2.5rem' }}>TastyTales</h1>
+            </div>
           </Header>
-
-          <Content
-            style={{
-              margin: '4px 5px 0',
-             
-              
-            }}
-          >
+  
+          <Content style={{ margin: '4px 5px 0' }}>
             <div
-               style={{
+              style={{
                 padding: '10px 0px',
                 background: colorBgContainer,
                 borderRadius: borderRadiusLG,
-              
                 maxHeight: 'calc(100vh - 50px)',
               }}
             >
-              <ContentScreen/>
+              <ContentScreen />
             </div>
           </Content>
           <Footer
             style={{
               padding: '8px 10px',
               textAlign: 'center',
-              lineHeight: '30px', // Center text vertically
+              lineHeight: '30px',
             }}
           >
             Rohit Doyal ©{new Date().getFullYear()}
@@ -99,5 +101,6 @@ export const HomeScreen = () => {
       </Layout>
     </div>
   );
+  
 };
 
