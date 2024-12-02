@@ -111,7 +111,6 @@ export const Allrecipe = () => {
             <RecipeCard
               key={d._id}
               recipe={d}
-              currentUserId={userID}
             />
           ))}
         </div>
