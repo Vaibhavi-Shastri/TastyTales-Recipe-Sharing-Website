@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { RecipeCard } from './RecipeCard';
+import RecipeCard from '../Recipe/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import { Input, Select, Row, Col } from 'antd';
 import Pagination from '../../pagination/Paginationcard';
@@ -12,8 +12,8 @@ const { Search } = Input;
 const { Option } = Select;
 
 export const Allrecipe = () => {
-  const [recipe, setRecipe] = useState([]); 
-  const [cookies, _] = useCookies(["access_token"]);
+  const [recipe, setRecipe] = useState([]);
+  const [cookies] = useCookies(["access_token"]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState('');
@@ -21,40 +21,35 @@ export const Allrecipe = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const pagelimit = 3;
-  let userID = window.localStorage.getItem('userID');
-  let cookie = cookies.access_token;
+  const userID = window.localStorage.getItem('userID');
+
+  const fetchRecipes = async () => {
+    try {
+        const response = await axios.get('http://localhost:5000/api/recipes', {
+            params: {
+                page: currentPage,
+                limit: pagelimit,
+                category,
+                difficulty,
+                search: searchTerm,
+            },
+        });
+        setRecipe(response.data.recipesWithUserDetails);
+        setTotalPages(response.data.totalPages);
+    } catch (err) {
+        console.error('Error fetching recipes:', err.response || err);
+    }
+};
+
 
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        let getrecipes = await axios.get("http://localhost:5000/api/recipes", {
-          params: {
-            page: currentPage,
-            limit: pagelimit,
-            category,
-            difficulty,
-            search: searchTerm,
-          },
-        });
-
-        setRecipe(getrecipes.data.recipesWithUserDetails);
-        setTotalPages(getrecipes.data.totalPages);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
     if (!userID) {
-      console.log("please login");
+      console.log("Please login");
       navigate("/login");
     } else {
       fetchRecipes();
     }
   }, [currentPage, category, difficulty, searchTerm]);
-
-  const handleCategoryChange = (value) => setCategory(value);
-  const handleDifficultyChange = (value) => setDifficulty(value);
-  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   return (
     <div>
@@ -64,7 +59,7 @@ export const Allrecipe = () => {
             <Search
               placeholder="Search by title or ingredients"
               value={searchTerm}
-              onChange={handleSearchChange}
+              onChange={(e) => setSearchTerm(e.target.value)}
               enterButton
             />
           </Col>
@@ -72,7 +67,7 @@ export const Allrecipe = () => {
             <Select
               placeholder="Select Category"
               value={category}
-              onChange={handleCategoryChange}
+              onChange={(value) => setCategory(value)}
               style={{ width: '100%' }}
             >
               <Option value="">All Categories</Option>
@@ -86,7 +81,7 @@ export const Allrecipe = () => {
             <Select
               placeholder="Select Difficulty"
               value={difficulty}
-              onChange={handleDifficultyChange}
+              onChange={(value) => setDifficulty(value)}
               style={{ width: '100%' }}
             >
               <Option value="">All Difficulty Levels</Option>
@@ -98,20 +93,13 @@ export const Allrecipe = () => {
         </Row>
       </div>
 
-      {/* Main Page Layout */}
       <div className="page-container">
-        {/* Featured Recipe Section */}
         <div className="featured-recipe-container">
           <FeaturedRecipe />
         </div>
-
-        {/* Recipe List Section */}
         <div className="recipe-container-wrapper">
-          {recipe && recipe.map((d, index) => (
-            <RecipeCard
-              key={d._id}
-              recipe={d}
-            />
+          {Array.isArray(recipe) && recipe.map((d) => (
+            <RecipeCard key={d._id} recipe={d} />
           ))}
         </div>
       </div>

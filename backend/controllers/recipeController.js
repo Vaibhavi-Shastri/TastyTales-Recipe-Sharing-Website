@@ -26,64 +26,79 @@ const createRecipe = async (req, res) => {
 
 
 const getRecipes = async (req, res) => {
-    // Convert page and limit to numbers
-    let { page = 1, limit = 5, category, difficulty, search } = req.query;
-    page = parseInt(page, 10);
-    limit = parseInt(limit, 10);
-    let query = {};
-    try {
+  let { page = 1, limit = 5, category, difficulty, search = '' } = req.query; // Default search to empty string
+  page = parseInt(page, 10);
+  limit = parseInt(limit, 10);
 
-	if (category) {
-		query.category = category;
-	}
-	if (difficulty) {
-		query.difficulty = difficulty;
-	}
+  const query = {};
+  if (category) query.category = category;
+  if (difficulty) query.difficulty = difficulty;
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { ingredients: { $regex: search, $options: 'i' } },
+    ];
+  }
+  console.log('Query object:', query);
+  try {
+    const recipes = await Recipe.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const total = await Recipe.countDocuments(query);
 
-    if (search) {
-      	query.$or = [
-			{ title: { $regex: search, $options: 'i' } },
-			{ ingredients: { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    const recipes = await Recipe.find(query).sort({ createdAt: -1 }).limit(limit )
-    .skip((page - 1) * limit)
-    .exec();
-
-    const count = await Recipe.countDocuments();
-    const recipesWithUserDetails = await Promise.all(recipes.map(async (recipe) => {
-      const user = await User.findById(recipe?.userid);
-      return {
-        ...recipe._doc,
-        username: user.username
-      };
-    }));
-
-    return res.status(200).json({
-      recipesWithUserDetails,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page
-    })
+    res.status(200).json({
+      recipes,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalRecipes: total,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Error fetching recipes' });
   }
 };
 
 
+const savedRecipe = async (req, res) => {
+  try {
+    const { recipeID, userID } = req.body;
 
-const savedRecipe = async(req,res)=>{
-  try{
-    const recipe = await Recipe.findById(req.body.recipeID);
-    const user = await User.findById(req.body.userID);
-    user.savedRecipes.push(recipe);  
+    // Validate IDs
+    if (!recipeID || !userID) {
+      return res.status(400).json({ message: 'RecipeID and UserID are required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(recipeID) || !mongoose.Types.ObjectId.isValid(userID)) {
+      return res.status(400).json({ message: 'Invalid RecipeID or UserID' });
+    }
+
+    // Find recipe and user
+    const recipe = await Recipe.findById(recipeID);
+    const user = await User.findById(userID);
+
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if recipe is already saved
+    const alreadySaved = user.savedRecipes.includes(recipeID);
+    if (alreadySaved) {
+      return res.status(400).json({ message: 'Recipe already saved' });
+    }
+
+    // Save recipe
+    user.savedRecipes.push(recipeID);
     await user.save();
+
     return res.status(201).json({ savedRecipes: user.savedRecipes });
   } catch (err) {
-    return res.status(500).json(err);
+    console.error('Error saving recipe:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
-}
+};
+
 
 
 
@@ -181,22 +196,23 @@ const addComment = async (req, res) => {
   const { recipeId } = req.params;
 
   try {
-    const recipe = await Recipe.findById(recipeId);
-    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
+      const recipe = await Recipe.findById(recipeId);
+      if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
 
-    const datacomment = { userid, comment };
-    recipe.comments.push(datacomment);
-    await recipe.save();
+      const datacomment = { userid, comment };
+      recipe.comments.push(datacomment);
+      await recipe.save();
 
-    const recipeoutput = await recipe.populate('comments.userid', 'username');
-    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
+      const recipeoutput = await recipe.populate('comments.userid', 'username');
+      if (!recipeoutput) return res.status(404).json({ message: 'Failed to populate recipe data' });
 
-    return res.status(201).json(recipeoutput.comments);
+      return res.status(201).json(recipeoutput.comments);
   } catch (error) {
-    console.error("Error adding comment:", error);
-    return res.status(500).json({ message: 'Server error' });
+      console.error("Error adding comment:", error);
+      return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // Edit a comment
 const editComment = async (req, res) => {
@@ -259,58 +275,62 @@ const getMyrecipe =async (req,res)=>{
 }
 
 
-const editMyrecipe = async(req,res)=>{
-	const { title, ingredients, instructions,imgurl, prepTime, difficulty, category } = req.body;
-	try{
-	const recipe = await Recipe.findById(req.params.userId);
-	if (recipe) {
-		recipe.title = title || recipe.title;
-		recipe.ingredients = ingredients || recipe.ingredients;
-		recipe.instructions = instructions || recipe.instructions;
-    recipe.imgurl = imgurl || recipe.imgurl;
-		recipe.prepTime = prepTime || recipe.prepTime;
-		recipe.difficulty = difficulty || recipe.difficulty;
-		recipe.category = category || recipe.category;
-		recipe.createdAt = new Date().getTime()
-	
-		const updatedRecipe = await recipe.save();
-		res.status(200).json(updatedRecipe);
-	} else {
-		res.status(404).json({ message: 'Recipe not found' });
-	}}catch(e){
-		res.status(500).json({ message: 'Server error' });
-	}
-}
+const editMyrecipe = async (req, res) => {
+  const { title, ingredients, instructions, imgurl, prepTime, difficulty, category } = req.body;
+  try {
+      const recipe = await Recipe.findById(req.params.recipeId); // Correct parameter to recipeId
+      if (recipe) {
+          recipe.title = title || recipe.title;
+          recipe.ingredients = ingredients || recipe.ingredients;
+          recipe.instructions = instructions || recipe.instructions;
+          recipe.imgurl = imgurl || recipe.imgurl;
+          recipe.prepTime = prepTime || recipe.prepTime;
+          recipe.difficulty = difficulty || recipe.difficulty;
+          recipe.category = category || recipe.category;
+          recipe.updatedAt = new Date(); // Use updatedAt instead of modifying createdAt
+
+          const updatedRecipe = await recipe.save();
+          res.status(200).json(updatedRecipe);
+      } else {
+          res.status(404).json({ message: 'Recipe not found' });
+      }
+  } catch (e) {
+      res.status(500).json({ message: 'Server error' });
+  }
+};
 
 
-const deleteMyrecipe = async(req,res)=>{
+const deleteMyrecipe = async (req, res) => {
   const { recipeId } = req.params;
   
   try {
-    // Find and delete the recipe
-    const deletedRecipe = await Recipe.findByIdAndDelete(recipeId);
-    if (!deletedRecipe) return res.status(404).json({ message: 'Recipe not found' });
+      // Find and delete the recipe
+      const deletedRecipe = await Recipe.findByIdAndDelete(recipeId);
+      if (!deletedRecipe) return res.status(404).json({ message: 'Recipe not found' });
 
-    // Find all users who have saved this recipe and remove it from their savedRecipes
-    await User.updateMany(
-      { savedRecipes: recipeId },
-      { $pull: { savedRecipes: recipeId } }
-    );
-    res.status(200).json({ message: 'Recipe deleted successfully' });
+      // Update all users' savedRecipes array
+      const usersUpdated = await User.updateMany(
+          { savedRecipes: recipeId },
+          { $pull: { savedRecipes: recipeId } }
+      );
+      console.log(`${usersUpdated.modifiedCount} users updated`);
+
+      res.status(200).json({ message: 'Recipe deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
   }
-}
+};
 
 
 
 
-const getFeaturerecipe =async(req,res)=>{
+
+const getFeaturerecipe = async (req, res) => {
   try {
-    // Aggregate recipes to find the one with the highest total ratings
     const recipes = await Recipe.aggregate([
       { $unwind: '$ratings' },
-      { $group: {
+      {
+        $group: {
           _id: '$_id',
           title: { $first: '$title' },
           ingredients: { $first: '$ingredients' },
@@ -321,11 +341,11 @@ const getFeaturerecipe =async(req,res)=>{
           category: { $first: '$category' },
           userid: { $first: '$userid' },
           ratings: { $push: '$ratings' },
-          totalRating: { $sum: '$ratings.rating' }
-        }
+          totalRating: { $sum: '$ratings.rating' },
+        },
       },
       { $sort: { totalRating: -1 } },
-      { $limit: 1 }
+      { $limit: 1 },
     ]);
 
     if (recipes.length === 0) {
@@ -333,25 +353,15 @@ const getFeaturerecipe =async(req,res)=>{
     }
 
     const featuredRecipe = recipes[0];
-    //finding user name corresponding recipe
-    const user = await User.findById(featuredRecipe?.userid);
-    const username= user.username
-    
-    if (featuredRecipe) {
-      res.status(200).json({featuredRecipe,username});
-    } else {
-      res.status(404).json({ message: 'No recipes found' });
-    }
-    
-    // return res.status(200).json(featuredRecipe);
+    const user = await User.findById(featuredRecipe.userid);
+    const username = user ? user.username : 'Unknown';
+
+    res.status(200).json({ featuredRecipe, username });
   } catch (error) {
     console.error('Error fetching featured recipe:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
-}
-
-
-
+};
 
 
 module.exports = {

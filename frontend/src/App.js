@@ -4,8 +4,10 @@ import { LoginScreen } from './screens/AUTH/LoginScreen';
 import {RegisterScreen} from './screens/AUTH/RegisterScreen';
 import NotFoundpage, { Notfoundpage } from './screens/Notdefinepage/Notfoundpage';
 import { Allrecipe } from './screens/Recipe/Allrecipe.js';
-import { RecipeDetails } from './screens/Recipe/RecipeDetails.js'; // Recipe Details Page
+import  RecipeDetails  from './screens/Recipe/RecipeDetails.js'; // Recipe Details Page
 import './index.css';
+import  RecipeCard  from './screens/Recipe/RecipeCard.js';
+import { Createrecipe } from './screens/Recipe/Createrecipe';
 
 
 
@@ -23,8 +25,10 @@ function App() {
 
             <Route path='/home' element={<HomeScreen/>} />
             <Route path="/" element={<Allrecipe />} />
-        <Route path="/recipe/:id" element={<RecipeDetails />} /> {/* Recipe details page */}
-     
+            <Route path="/create" element={<Createrecipe />} />
+        
+        <Route path="/recipes/:id" element={<RecipeDetails />} />
+
             <Route path="*" element={<Notfoundpage/>} /> {/* This catches all undefined routes */}
 
           </Routes>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card } from 'antd';
-import { RecipeCard } from './RecipeCard';
+import  RecipeCard  from '../Recipe/RecipeCard.js';
 
 
 
