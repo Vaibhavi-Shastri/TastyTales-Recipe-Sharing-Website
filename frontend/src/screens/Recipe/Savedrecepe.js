@@ -2,7 +2,7 @@
 import axios from 'axios';
 import {useCookies} from 'react-cookie';
 import React, { useEffect, useState } from 'react'
-import  RecipeCard  from '../Recipe/RecipeCard.js';
+import { RecipeCard } from './RecipeCard';
 
 
 export const Savedrecepe = () => {
