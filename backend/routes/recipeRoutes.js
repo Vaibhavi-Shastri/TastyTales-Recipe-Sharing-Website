@@ -24,7 +24,7 @@ router.route('/:recipeId/comments/:commentId').delete(protect, deleteComment);
 //myrecipe route
 //comment route /myrecipe/:userId
 router.route('/myrecipe/:userId').get(protect,getMyrecipe);
-router.route('/myrecipe/:recipeId').put(protect, editMyrecipe);
+router.route('/myrecipe/:userId').put(protect, editMyrecipe);
 router.route('/myrecipe/:recipeId').delete(protect, deleteMyrecipe);
 
 
