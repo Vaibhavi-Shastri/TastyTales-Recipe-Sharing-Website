@@ -5,12 +5,7 @@ import { Createrecipe } from './Recipe/Createrecipe';
 import { Savedrecepe } from './Recipe/Savedrecepe';
 import { Userprofile } from './profile/Userprofile';
 import MyRecipeSection from './Recipe/MyRecipeSection';
-import RecipeCard from '../screens/Recipe/RecipeCard.js'; // If default export
-
-
-
-
-
+import { RecipeCard } from '../screens/Recipe/RecipeCard.js'; // If default export
 
 export const ContentScreen = () => {
   const currentPage = useSelector((state) => state.page.currentPage);

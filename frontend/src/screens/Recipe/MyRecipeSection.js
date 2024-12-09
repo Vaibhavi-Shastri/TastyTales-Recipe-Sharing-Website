@@ -12,7 +12,6 @@ const MyRecipeSection = () => {
   const [cookies] = useCookies(["access_token"]);
   const userID = window.localStorage.getItem('userID');
 
-
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
@@ -24,12 +23,10 @@ const MyRecipeSection = () => {
         console.error(err);
       }
     };
-    if(userID){
+    if (userID) {
       fetchRecipes();
-  }
+    }
   }, [userID]);
-
-
 
   const deleteRecipe = async (recipeId) => {
     try {
@@ -71,25 +68,38 @@ const MyRecipeSection = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>My Recipes</h1>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-        {recipes.map(recipe => (
-          <Card
-            key={recipe._id}
-            style={{ width: '300px' }}
-            cover={<img alt="recipe" src={recipe.imgurl} height='200px'/>}
-            actions={[
-              <Button onClick={() => handleEdit(recipe)}>Edit</Button>,
-              <Button onClick={() => confirmDelete(recipe._id)} danger>Delete</Button>
-            ]}
-          >
-            <Meta title={recipe.title} />
-            <p>Preparation Time: {recipe.prepTime+"minutes"} </p>
-            <p>Difficulty Level: {recipe.difficulty} </p>
-            <p>Category: {recipe.category} </p>
-          </Card>
-        ))}
-      </div>
+      <h1 style={{ textAlign: 'center', fontSize: '2.5rem' }}>My Recipes</h1>
+      {recipes.length === 0 ? (
+        <p style={{ textAlign: 'center', marginTop: '50px' }}>No recipes found. Start adding your favorite recipes!</p>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: '#f0f2f5', 
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '20px',
+            padding: '20px',
+          }}
+        >
+          {recipes.map(recipe => (
+            <Card
+              key={recipe._id}
+              style={{ width: '300px', textAlign: 'center' }} // Fixed width for consistent sizing
+              cover={<img alt="recipe" src={recipe.imgurl} height='200px' />}
+              actions={[
+                <Button onClick={() => handleEdit(recipe)}>Edit</Button>,
+                <Button onClick={() => confirmDelete(recipe._id)} danger>Delete</Button>
+              ]}
+            >
+              <Meta title={recipe.title} />
+              <p>Preparation Time: {recipe.prepTime} minutes</p>
+              <p>Difficulty Level: {recipe.difficulty}</p>
+              <p>Category: {recipe.category}</p>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {editingRecipe && (
         <Modal
@@ -98,178 +108,54 @@ const MyRecipeSection = () => {
           onCancel={() => setEditingRecipe(null)}
           footer={null}
         >
-          
           <Form
-       
-        initialValues={editingRecipe}
-        onFinish={handleUpdate}
-        layout='vertical'
-        style={{width:'60%'}}
-      >
-        <Form.Item
-          label="Recipe"
-          name="title"
-          rules={[
-            {
-              required: true,
-              message: "Please enter recipe name"
-            }
-          ]}
-        >
-          <Input
-            size='large'
-            placeholder='Recipe name'
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Ingredients"
-          name="ingredients"
-          tooltip='Enter comma seperated names'
-          rules={[
-            {
-              required: true,
-              message: "Please enter ingredients"
-            }
-          ]}
-        >
-          <TextArea
-            rows={2}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Instructions"
-          name="instructions"
-          rules={[
-            {
-              required: true,
-              message: "Please enter recipe instruction "
-            }
-          ]}
-        >
-          <TextArea
-            placeholder='Enter here recipe instruction '
-            rows={3}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Image Url"
-          name="imgurl"
-
-          rules={[
-            {
-              required: true,
-              message: "Please enter Image Url"
-            },
-            {
-              type: 'url',
-              message: 'Please enter a valid URL',
-            },
-          ]}
-        >
-          <Input
-            size='large'
-            placeholder='enter here'
-          />
-        </Form.Item>
-
-
-        <Form.Item
-          label="Preptime"
-          name="prepTime"
-          tooltip='Please enter prepration time in minutes'
-          rules={[
-            {
-              required: true,
-              message: "Please enter Prepration time "
-            }
-          ]}
-        >
-          <Input
-            size='large'
-            type='number'
-            placeholder='Prepration time in minutes'
-          />
-        </Form.Item>
-
-
-        <Form.Item
-          label="Difficulty"
-          name="difficulty"
-          rules={[
-            {
-              required: true,
-              message: "Please select difficulty level"
-            }
-          ]}
-        >
-          <Select
-            options={[
-              {
-                label: 'Easy',
-                value: 'Easy'
-              },
-              {
-                label: 'Medium',
-                value: 'Medium'
-              },
-              {
-                label: 'Hard',
-                value: 'Hard'
-              },
-            
-          
-            ]}
-            placeholder='Select difficulty level '
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Category"
-          name="category"
-          rules={[
-            {
-              required: true,
-              message: "Please select category"
-            }
-          ]}
-        >
-          <Select
-            options={[
-              {
-                label: 'Main course',
-                value: 'main course'
-              },
-              {
-                label: 'Dessert',
-                value: 'dessert'
-              },
-              {
-                label: 'Snacks',
-                value: 'snacks'
-              },
-              {
-                label: 'Fastfood',
-                value: 'fastfood'
-              },
-          
-            ]}
-            placeholder='Select category from here'
-          />
-        </Form.Item>
-
-        <Form.Item
-         
-        >
-          <Button
-            htmlType='submit'
-            type='primary'
-            
-          >Save</Button>
-        </Form.Item>
-      </Form>
+            initialValues={editingRecipe}
+            onFinish={handleUpdate}
+            layout='vertical'
+          >
+            <Form.Item label="Recipe" name="title" rules={[{ required: true, message: "Please enter recipe name" }]}>
+              <Input placeholder='Recipe name' />
+            </Form.Item>
+            <Form.Item label="Ingredients" name="ingredients" tooltip='Enter comma separated names' rules={[{ required: true, message: "Please enter ingredients" }]}>
+              <TextArea rows={2} />
+            </Form.Item>
+            <Form.Item label="Instructions" name="instructions" tooltip='Enter fullstop separated steps' rules={[{ required: true, message: "Please enter recipe instructions" }]}>
+              <TextArea rows={3} />
+            </Form.Item>
+            <Form.Item label="Image Url" name="imgurl" rules={[{ required: true, message: "Please enter Image URL" }, { type: 'url', message: 'Please enter a valid URL' }]}>
+              <Input placeholder='Enter image URL' />
+            </Form.Item>
+            <Form.Item label="Prep Time" name="prepTime" tooltip='Enter preparation time in minutes' rules={[{ required: true, message: "Please enter preparation time" }]}>
+              <Input type='number' placeholder='Preparation time in minutes' />
+            </Form.Item>
+            <Form.Item label="Difficulty" name="difficulty" rules={[{ required: true, message: "Please select difficulty level" }]}>
+              <Select
+                options={[
+                  { label: 'Easy', value: 'Easy' },
+                  { label: 'Medium', value: 'Medium' },
+                  { label: 'Hard', value: 'Hard' },
+                ]}
+                placeholder='Select difficulty level'
+              />
+            </Form.Item>
+            <Form.Item label="Category" name="category" rules={[{ required: true, message: "Please select category" }]}>
+              <Select
+                options={[
+                  { label: 'North Indian', value: 'north indian' },
+                  { label: 'South Indian', value: 'south indian' },
+                  { label: 'Chinese', value: 'chinese' },
+                  { label: 'Italian', value: 'italian' },
+                  { label: 'Snacks', value: 'snacks' },
+                  { label: 'Dessert', value: 'dessert' },
+                  { label: 'Beverages', value: 'beverages' },
+                ]}
+                placeholder='Select category'
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type='primary' htmlType='submit'>Save</Button>
+            </Form.Item>
+          </Form>
         </Modal>
       )}
     </div>

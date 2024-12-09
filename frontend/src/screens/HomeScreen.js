@@ -85,6 +85,7 @@ export const HomeScreen = () => {
               style={{
                 padding: '10px 0px',
                 background: colorBgContainer,
+                backgroundColor: '#f0f2f5', 
                 borderRadius: borderRadiusLG,
                 maxHeight: 'calc(100vh - 50px)',
               }}
@@ -100,7 +101,7 @@ export const HomeScreen = () => {
     backgroundColor: '#f0f2f5', // Light background for footer
   }}
 >
-  {/* Empty footer */}
+© 2024 RecipeSharingWebsite. Let's cook together!
 </Footer>
         </Layout>
       </Layout>

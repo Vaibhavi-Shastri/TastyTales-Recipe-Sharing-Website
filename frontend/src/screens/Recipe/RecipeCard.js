@@ -158,18 +158,35 @@ return (
 
       {/* Conditional Rendering of CommentSection */}
       {showDetail && (<Modal
-        title="Ingredients And Instructions"
-        open={!!showDetail }
-        onCancel={() => setShowDetail(false)}
-        footer={null}
-        >
-          <div>
-        <b>Ingredients : </b>
-        <p>{recipe?.ingredients}</p>
-        <b>Instructions : </b>
-        <p>{recipe?.instructions}</p>
-        </div>
-      </Modal>)}
+  title="Ingredients And Instructions"
+  open={!!showDetail}
+  onCancel={() => setShowDetail(false)}
+  footer={null}
+>
+  <div>
+    <b>Ingredients:</b>
+    <ul>
+      {Array.isArray(recipe?.ingredients)
+        ? recipe?.ingredients[0]?.split(',').map((item, index) => (
+            <li key={index}>{item.trim()}</li>
+          ))
+        : "No ingredients available"}
+    </ul>
+
+    <b>Instructions:</b>
+    <ol>
+      {typeof recipe?.instructions === 'string'
+        ? recipe?.instructions.split('.').map((step, index) =>
+            step.trim() ? <li key={index}>{step.trim()}</li> : null
+          )
+        : "No instructions available"}
+    </ol>
+  </div>
+</Modal>
+
+
+
+)}
     <b style={{display:'block'}}>Comment</b>
 
 
